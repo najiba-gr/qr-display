@@ -1,81 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { CommonModule } from '@angular/common';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affichage des Données</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .container { max-width: 600px; margin: auto; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Détails</h1>
+    <table id="dataTable"></table>
+  </div>
 
-@Component({
-  selector: 'app-pdf-viewer-component',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './pdf-viewer-component.component.html',
-  styleUrls: ['./pdf-viewer-component.component.scss']
-})
-export class PdfViewerComponentComponent implements OnInit {
-  pdfSrc: SafeResourceUrl | null = null;
-  error: string | null = null;
-  type: string | null = null;
-  id: string | null = null;
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    const table = document.getElementById('dataTable');
 
-  constructor(
-    private route: ActivatedRoute,
-    private sanitizer: DomSanitizer
-  ) {}
+    if (data) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(data));
+        let html = '<tr><th>Champ</th><th>Valeur</th></tr>';
 
-  ngOnInit() {
-    this.type = this.route.snapshot.paramMap.get('type');
-    this.id = this.route.snapshot.paramMap.get('id');
-    console.log('Type:', this.type, 'ID:', this.id);
-    if (this.type && this.id) {
-      this.generatePdf(this.type, this.id);
+        for (const [key, value] of Object.entries(parsedData)) {
+          html += `<tr><td>${key}</td><td>${value}</td></tr>`;
+        }
+        table.innerHTML = html;
+      } catch (e) {
+        table.innerHTML = '<tr><td colspan="2">Erreur : Données invalides</td></tr>';
+      }
     } else {
-      this.error = 'Type ou ID manquant';
-      console.log('Error:', this.error);
+      table.innerHTML = '<tr><td colspan="2">Aucune donnée fournie.</td></tr>';
     }
-  }
-
-  generatePdf(type: string, id: string) {
-    console.log('Generating PDF for:', type, id);
-    // Données statiques basées sur type et id (pas d'appel API)
-    const pdfData = {
-      type: type,
-      id: id,
-      message: `Ceci est un PDF généré pour ${type} avec l'ID ${id}`,
-      date: new Date().toLocaleString()
-    };
-
-    this.createPdf(pdfData);
-  }
-
-  createPdf(data: any) {
-    console.log('Creating PDF with data:', data);
-    const element = document.createElement('div');
-    element.innerHTML = `
-      <h1>Document PDF</h1>
-      <p><strong>Type:</strong> ${data.type}</p>
-      <p><strong>ID:</strong> ${data.id}</p>
-      <p><strong>Message:</strong> ${data.message}</p>
-      <p><strong>Date:</strong> ${data.date}</p>
-    `;
-    document.body.appendChild(element);
-    element.style.position = 'absolute';
-    element.style.left = '-9999px';
-
-    html2canvas(element).then(canvas => {
-      console.log('Canvas generated');
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // Largeur A4 en mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      const pdfBlob = pdf.output('blob');
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(pdfBlob));
-      console.log('PDF generated:', this.pdfSrc);
-      document.body.removeChild(element);
-    }).catch(err => {
-      this.error = 'Erreur lors de la génération du PDF: ' + err.message;
-      console.log('Error generating PDF:', err);
-    });
-  }
-}
+  </script>
+</body>
+</html>
