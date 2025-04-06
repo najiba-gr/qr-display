@@ -1,0 +1,81 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-pdf-viewer-component',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './pdf-viewer-component.component.html',
+  styleUrls: ['./pdf-viewer-component.component.scss']
+})
+export class PdfViewerComponentComponent implements OnInit {
+  pdfSrc: SafeResourceUrl | null = null;
+  error: string | null = null;
+  type: string | null = null;
+  id: string | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  ngOnInit() {
+    this.type = this.route.snapshot.paramMap.get('type');
+    this.id = this.route.snapshot.paramMap.get('id');
+    console.log('Type:', this.type, 'ID:', this.id);
+    if (this.type && this.id) {
+      this.generatePdf(this.type, this.id);
+    } else {
+      this.error = 'Type ou ID manquant';
+      console.log('Error:', this.error);
+    }
+  }
+
+  generatePdf(type: string, id: string) {
+    console.log('Generating PDF for:', type, id);
+    // Données statiques basées sur type et id (pas d'appel API)
+    const pdfData = {
+      type: type,
+      id: id,
+      message: `Ceci est un PDF généré pour ${type} avec l'ID ${id}`,
+      date: new Date().toLocaleString()
+    };
+
+    this.createPdf(pdfData);
+  }
+
+  createPdf(data: any) {
+    console.log('Creating PDF with data:', data);
+    const element = document.createElement('div');
+    element.innerHTML = `
+      <h1>Document PDF</h1>
+      <p><strong>Type:</strong> ${data.type}</p>
+      <p><strong>ID:</strong> ${data.id}</p>
+      <p><strong>Message:</strong> ${data.message}</p>
+      <p><strong>Date:</strong> ${data.date}</p>
+    `;
+    document.body.appendChild(element);
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+
+    html2canvas(element).then(canvas => {
+      console.log('Canvas generated');
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210; // Largeur A4 en mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      const pdfBlob = pdf.output('blob');
+      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(pdfBlob));
+      console.log('PDF generated:', this.pdfSrc);
+      document.body.removeChild(element);
+    }).catch(err => {
+      this.error = 'Erreur lors de la génération du PDF: ' + err.message;
+      console.log('Error generating PDF:', err);
+    });
+  }
+}
