@@ -3,41 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Affichage des Données</title>
+  <title>Détails du Compte/Demande</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .container { max-width: 600px; margin: auto; }
-    h1 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
+    body {
+      font-family: 'Helvetica', Arial, sans-serif;
+      padding: 40px;
+      background-color: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #2c3e50;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #2c3e50;
+    }
+    .header p {
+      margin: 5px 0 0;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #34495e;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .data-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    .data-item:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .value {
+      color: #555;
+      text-align: right;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Détails</h1>
-    <table id="dataTable"></table>
+    <div class="header">
+      <h1>Détails</h1>
+      <p>Généré le: <span id="generatedDate"></span></p>
+    </div>
+    <div class="section" id="dataSection"></div>
+    <div class="footer">
+      Document généré automatiquement via QR Code
+    </div>
   </div>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
-    const table = document.getElementById('dataTable');
+    const dataSection = document.getElementById('dataSection');
+    const generatedDate = document.getElementById('generatedDate');
+
+    // Afficher la date actuelle
+    generatedDate.textContent = new Date().toLocaleString();
 
     if (data) {
       try {
         const parsedData = JSON.parse(decodeURIComponent(data));
-        let html = '<tr><th>Champ</th><th>Valeur</th></tr>';
+        let html = '';
 
-        for (const [key, value] of Object.entries(parsedData)) {
-          html += `<tr><td>${key}</td><td>${value}</td></tr>`;
+        // Afficher les données dans un format structuré
+        if (parsedData.type === 'account') {
+          html += '<div class="section-title">Informations du Compte</div>';
+          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Compte</span></div>`;
+          html += `<div class="data-item"><span class="label">IBAN:</span><span class="value">${parsedData.iban || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Type de compte:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Solde:</span><span class="value">${parsedData.balance || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Statut:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Date de création:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
+        } else if (parsedData.type === 'request') {
+          html += '<div class="section-title">Informations de la Demande</div>';
+          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Demande</span></div>`;
+          html += `<div class="data-item"><span class="label">Type de compte:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Solde initial:</span><span class="value">${parsedData.initialBalance || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Statut:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Date de création:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Raison du rejet:</span><span class="value">${parsedData.rejectionReason || 'N/A'}</span></div>`;
+        } else {
+          html += '<p>Type de données inconnu</p>';
         }
-        table.innerHTML = html;
+
+        dataSection.innerHTML = html;
       } catch (e) {
-        table.innerHTML = '<tr><td colspan="2">Erreur : Données invalides</td></tr>';
+        dataSection.innerHTML = '<p>Erreur : Données invalides</p>';
       }
     } else {
-      table.innerHTML = '<tr><td colspan="2">Aucune donnée fournie.</td></tr>';
+      dataSection.innerHTML = '<p>Aucune donnée fournie.</p>';
     }
   </script>
 </body>
