@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Détails du Compte/Demande</title>
+  <title>Account/Request Details</title>
   <style>
     body {
       font-family: 'Helvetica', Arial, sans-serif;
@@ -76,12 +76,12 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Détails</h1>
-      <p>Généré le: <span id="generatedDate"></span></p>
+      <h1>Details</h1>
+      <p>Generated on: <span id="generatedDate"></span></p>
     </div>
     <div class="section" id="dataSection"></div>
     <div class="footer">
-      Document généré automatiquement via QR Code
+      Document automatically generated via QR Code
     </div>
   </div>
 
@@ -91,7 +91,7 @@
     const dataSection = document.getElementById('dataSection');
     const generatedDate = document.getElementById('generatedDate');
 
-    // Afficher la date actuelle
+    // Display the current date
     generatedDate.textContent = new Date().toLocaleString();
 
     if (data) {
@@ -99,33 +99,33 @@
         const parsedData = JSON.parse(decodeURIComponent(data));
         let html = '';
 
-        // Afficher les données dans un format structuré
+        // Display the data in a structured format
         if (parsedData.type === 'account') {
-          html += '<div class="section-title">Informations du Compte</div>';
-          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Compte</span></div>`;
+          html += '<div class="section-title">Account Information</div>';
+          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Account</span></div>`;
           html += `<div class="data-item"><span class="label">IBAN:</span><span class="value">${parsedData.iban || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Type de compte:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Solde:</span><span class="value">${parsedData.balance || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Statut:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Date de création:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Account Type:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Balance:</span><span class="value">${parsedData.balance || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Status:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Creation Date:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
         } else if (parsedData.type === 'request') {
-          html += '<div class="section-title">Informations de la Demande</div>';
-          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Demande</span></div>`;
-          html += `<div class="data-item"><span class="label">Type de compte:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Solde initial:</span><span class="value">${parsedData.initialBalance || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Statut:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Date de création:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
-          html += `<div class="data-item"><span class="label">Raison du rejet:</span><span class="value">${parsedData.rejectionReason || 'N/A'}</span></div>`;
+          html += '<div class="section-title">Request Information</div>';
+          html += `<div class="data-item"><span class="label">Type:</span><span class="value">Request</span></div>`;
+          html += `<div class="data-item"><span class="label">Account Type:</span><span class="value">${parsedData.accountType || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Initial Balance:</span><span class="value">${parsedData.initialBalance || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Status:</span><span class="value">${parsedData.status || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Creation Date:</span><span class="value">${parsedData.createdDate || 'N/A'}</span></div>`;
+          html += `<div class="data-item"><span class="label">Rejection Reason:</span><span class="value">${parsedData.rejectionReason || 'N/A'}</span></div>`;
         } else {
-          html += '<p>Type de données inconnu</p>';
+          html += '<p>Unknown data type</p>';
         }
 
         dataSection.innerHTML = html;
       } catch (e) {
-        dataSection.innerHTML = '<p>Erreur : Données invalides</p>';
+        dataSection.innerHTML = '<p>Error: Invalid data</p>';
       }
     } else {
-      dataSection.innerHTML = '<p>Aucune donnée fournie.</p>';
+      dataSection.innerHTML = '<p>No data provided.</p>';
     }
   </script>
 </body>
